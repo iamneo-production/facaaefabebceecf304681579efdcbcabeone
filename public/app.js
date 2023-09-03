@@ -1,88 +1,69 @@
-// Variables to keep track of game state
-let currentPlayer = 'X'; // 'X' or 'O'
-let gameBoard = ['', '', '', '', '', '', '', '', ''];
-let gameActive = true;
+// Initial game state
+let cells = ['', '', '', '', '', '', '', '', ''];
+let currentPlayer = 'X';
+let result = document.querySelector('.result');
+let btns = document.querySelectorAll('.btn');
+let conditions = [
+    [0, 1, 2],
+    [3, 4, 5],
+    [6, 7, 8],
+    [0, 3, 6],
+    [1, 4, 7],
+    [2, 5, 8],
+    [0, 4, 8],
+    [2, 4, 6]
+];
 
-// Function to handle a player's move
-function handleCellClick(cell, cellIndex) {
-  // Check if the clicked cell is empty and the game is active
-  if (gameBoard[cellIndex] === '' && gameActive) {
-    // Update the cell with the current player's symbol
-    cell.innerText = currentPlayer;
-    gameBoard[cellIndex] = currentPlayer;
-    
-    // Check for a win or a draw
-    if (checkWin() || checkDraw()) {
-      endGame();
-    } else {
-      // Switch to the other player's turn
-      currentPlayer = currentPlayer === 'X' ? 'O' : 'X';
-      updateTurnMessage();
+// Function to handle player moves
+const ticTacToe = (element, index) => {
+    // Check if the clicked cell is empty
+    if (cells[index] === '' && result.innerText === '') {
+        // Update the cell with the current player's symbol
+        element.innerText = currentPlayer;
+        cells[index] = currentPlayer;
+        
+        // Check for winning conditions
+        for (const condition of conditions) {
+            const [a, b, c] = condition;
+            if (cells[a] && cells[a] === cells[b] && cells[a] === cells[c]) {
+                // Display the winning message
+                result.innerText = `Player ${currentPlayer} wins!`;
+
+                // Disable all buttons
+                btns.forEach(btn => btn.disabled = true);
+
+                return; // Exit the function
+            }
+        }
+
+        // Switch to the other player's turn
+        currentPlayer = currentPlayer === 'X' ? 'O' : 'X';
+        
+        // Display the current player's turn
+        result.innerText = `Player ${currentPlayer}'s Turn`;
     }
-  }
-}
-
-// Function to check for a win
-function checkWin() {
-  const winCombinations = [
-    [0, 1, 2], [3, 4, 5], [6, 7, 8], // Rows
-    [0, 3, 6], [1, 4, 7], [2, 5, 8], // Columns
-    [0, 4, 8], [2, 4, 6] // Diagonals
-  ];
-
-  for (const combination of winCombinations) {
-    const [a, b, c] = combination;
-    if (gameBoard[a] && gameBoard[a] === gameBoard[b] && gameBoard[a] === gameBoard[c]) {
-      return true;
-    }
-  }
-  return false;
-}
-
-// Function to check for a draw
-function checkDraw() {
-  return !gameBoard.includes('');
-}
-
-// Function to end the game
-function endGame() {
-  gameActive = false;
-  const resultContainer = document.querySelector('.result');
-  if (checkWin()) {
-    resultContainer.innerText = `Player ${currentPlayer} wins!`;
-  } else {
-    resultContainer.innerText = 'It\'s a draw!';
-  }
-}
-
-// Function to update the turn message
-function updateTurnMessage() {
-  const resultContainer = document.querySelector('.result');
-  resultContainer.innerText = `Player ${currentPlayer}'s Turn`;
-}
-
-// Add click event listeners to the game cells
-const cells = document.querySelectorAll('.btn');
-cells.forEach((cell, index) => {
-  cell.addEventListener('click', () => {
-    handleCellClick(cell, index);
-  });
-});
-
-// Add a click event listener to the reset button
-const resetButton = document.getElementById('Reset');
-resetButton.addEventListener('click', resetGame);
+};
 
 // Function to reset the game
-function resetGame() {
-  gameBoard = ['', '', '', '', '', '', '', '', ''];
-  gameActive = true;
-  currentPlayer = 'X';
-  cells.forEach((cell) => {
-    cell.innerText = '';
-  });
-  updateTurnMessage();
-}
+const resetGame = () => {
+    // Reset game state variables
+    cells = ['', '', '', '', '', '', '', '', ''];
+    currentPlayer = 'X';
 
-// Initialize the game
-updateTurnMessage();
+    // Clear the result message
+    result.innerText = 'Player X\'s Turn';
+
+    // Re-enable all buttons
+    btns.forEach(btn => {
+        btn.innerText = '';
+        btn.disabled = false;
+    });
+};
+
+// Add click event listeners to the buttons
+btns.forEach((btn, i) => {
+    btn.addEventListener('click', () => ticTacToe(btn, i));
+});
+
+// Add a click event listener to the "Reset" button
+document.querySelector('#reset').addEventListener('click', resetGame);
