@@ -1,64 +1,88 @@
-// Initial game state
-let cells = ['', '', '', '', '', '', '', '', ''];
-let currentPlayer = 'X';
-let result = document.querySelector('.result');
-let btns = document.querySelectorAll('.btn');
-let conditions = [
-    [0, 1, 2],
-    [3, 4, 5],
-    [6, 7, 8],
-    [0, 3, 6],
-    [1, 4, 7],
-    [2, 5, 8],
-    [0, 4, 8],
-    [2, 4, 6]
-];
+// Variables to keep track of game state
+let currentPlayer = 'X'; // 'X' or 'O'
+let gameBoard = ['', '', '', '', '', '', '', '', ''];
+let gameActive = true;
 
-// Function to handle player moves
-const ticTacToe = (element, index) => {
-    // Your game logic here
+// Function to handle a player's move
+function handleCellClick(cell, cellIndex) {
+  // Check if the clicked cell is empty and the game is active
+  if (gameBoard[cellIndex] === '' && gameActive) {
+    // Update the cell with the current player's symbol
+    cell.innerText = currentPlayer;
+    gameBoard[cellIndex] = currentPlayer;
+    
+    // Check for a win or a draw
+    if (checkWin() || checkDraw()) {
+      endGame();
+    } else {
+      // Switch to the other player's turn
+      currentPlayer = currentPlayer === 'X' ? 'O' : 'X';
+      updateTurnMessage();
+    }
+  }
+}
 
-    /*
-    **Part 1: Winning Conditions (Add your code here)**
+// Function to check for a win
+function checkWin() {
+  const winCombinations = [
+    [0, 1, 2], [3, 4, 5], [6, 7, 8], // Rows
+    [0, 3, 6], [1, 4, 7], [2, 5, 8], // Columns
+    [0, 4, 8], [2, 4, 6] // Diagonals
+  ];
 
-    1. Implement the logic to check for winning conditions using the 'conditions' array.
-    2. Display a winning message in the 'result' element when a player wins.
-    3. Disable all buttons after a win.
-    */
+  for (const combination of winCombinations) {
+    const [a, b, c] = combination;
+    if (gameBoard[a] && gameBoard[a] === gameBoard[b] && gameBoard[a] === gameBoard[c]) {
+      return true;
+    }
+  }
+  return false;
+}
 
-    // Your code to update the game state and check for a win
-    // ...
+// Function to check for a draw
+function checkDraw() {
+  return !gameBoard.includes('');
+}
 
-    // Your code to display the current player's turn
-    // ...
+// Function to end the game
+function endGame() {
+  gameActive = false;
+  const resultContainer = document.querySelector('.result');
+  if (checkWin()) {
+    resultContainer.innerText = `Player ${currentPlayer} wins!`;
+  } else {
+    resultContainer.innerText = 'It\'s a draw!';
+  }
+}
 
-    // Your code to handle button and cell interactions
-    // ...
-};
+// Function to update the turn message
+function updateTurnMessage() {
+  const resultContainer = document.querySelector('.result');
+  resultContainer.innerText = `Player ${currentPlayer}'s Turn`;
+}
 
-    /*
-    **Part 2: Reset Function (Add your code here)**
-
-    1. Implement a new function that resets the game to its initial state.
-    2. Ensure the 'cells', 'btns', and 'currentPlayer' variables are reset.
-    3. Update the 'result' element to indicate the current player's turn.
-    4. Re-enable all buttons for a new game.
-    */
-
-// Function to reset the game
-const resetGame = () => {
-    // Your code to reset the game state
-    // ...
-
-    // Your code to update the 'result' element
-    // ...
-
-    // Your code to re-enable buttons
-    // ...
-};
-
-btns.forEach((btn, i) => {
-    btn.addEventListener('click', () => ticTacToe(btn, i));
+// Add click event listeners to the game cells
+const cells = document.querySelectorAll('.btn');
+cells.forEach((cell, index) => {
+  cell.addEventListener('click', () => {
+    handleCellClick(cell, index);
+  });
 });
 
-document.querySelector('#reset').addEventListener('click', resetGame);
+// Add a click event listener to the reset button
+const resetButton = document.getElementById('Reset');
+resetButton.addEventListener('click', resetGame);
+
+// Function to reset the game
+function resetGame() {
+  gameBoard = ['', '', '', '', '', '', '', '', ''];
+  gameActive = true;
+  currentPlayer = 'X';
+  cells.forEach((cell) => {
+    cell.innerText = '';
+  });
+  updateTurnMessage();
+}
+
+// Initialize the game
+updateTurnMessage();
